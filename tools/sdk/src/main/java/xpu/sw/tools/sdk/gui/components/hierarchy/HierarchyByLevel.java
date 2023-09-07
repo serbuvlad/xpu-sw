@@ -16,6 +16,7 @@ import org.apache.commons.configuration2.*;
 import org.apache.logging.log4j.*;
 
 import xpu.sw.tools.sdk.common.context.*;
+import xpu.sw.tools.sdk.common.io.*;
 import xpu.sw.tools.sdk.common.project.*;
 import xpu.sw.tools.sdk.common.utils.*;
 import xpu.sw.tools.sdk.gui.*;
@@ -59,20 +60,21 @@ public class HierarchyByLevel extends GuiPanel {
 
 //-------------------------------------------------------------------------------------
     private void loadProjects(){
-        String _librariesPath = FileUtils.importPath(sdkConfig.getString("librariesPath", "~/"));
+        String _librariesPath = PathResolver.importPath(sdkConfig.getString("librariesPath", "~/"));
         switch (level) {
             case Context.PROFILE_LEVEL_LOW: {
-                basePath = _librariesPath + "lowlevel";
+                basePath = _librariesPath + "low_level";
                 loadProjectsFromDirectory();
                 break;
             }    
             case Context.PROFILE_LEVEL_MID: {
-                basePath = _librariesPath + "midlevel";
+                basePath = _librariesPath + "mid_level";
                 loadProjectsFromDirectory();
                 break;
             }    
             case Context.PROFILE_LEVEL_APP: {
-                basePath = FileUtils.importPath(sdkConfig.getString("appsPath", "~/.xpu/projects/"));
+//                basePath = PathResolver.importPath(sdkConfig.getString("appsPath", "~/.xpu/projects/"));
+                basePath = _librariesPath + "app_level";
                 java.util.List<String> _openProjectsPaths = sdkConfig.getList(String.class, "open_projects");
                 if((_openProjectsPaths == null) || (_openProjectsPaths.size() == 0)){
                     loadProjectsFromDirectory();
@@ -159,6 +161,14 @@ public class HierarchyByLevel extends GuiPanel {
     public void removeProject(Project _project){
        // ConfigDeleteProject(_project);
         hierarchyTreeModel.removeProject(_project);
+
+//        sdkConfig.removeProperty("open_projects", _project.getPathToConfigFile());        
+    }
+
+//-------------------------------------------------------------------------------------
+    public java.util.List<Project> getProjects(){
+       // ConfigDeleteProject(_project);
+        return hierarchyTreeModel.getProjects();
 
 //        sdkConfig.removeProperty("open_projects", _project.getPathToConfigFile());        
     }

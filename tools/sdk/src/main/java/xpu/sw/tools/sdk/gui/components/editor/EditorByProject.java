@@ -13,6 +13,7 @@ import org.apache.commons.configuration2.*;
 import org.apache.logging.log4j.*;
 
 import xpu.sw.tools.sdk.common.context.*;
+import xpu.sw.tools.sdk.common.io.*;
 import xpu.sw.tools.sdk.common.project.*;
 
 import xpu.sw.tools.sdk.gui.*;
@@ -87,6 +88,7 @@ public class EditorByProject extends GuiPanel implements CloseTabListener {
 
 //-------------------------------------------------------------------------------------
     public int addTab(String _filePath){    
+        _filePath = project.getRootPath() + PathResolver.separator + _filePath;
         return addTab(new File(_filePath));
 //        jTabbedPane1.setSelectedIndex(jTabbedPane1.getTabCount() - 1);
     }
@@ -98,9 +100,10 @@ public class EditorByProject extends GuiPanel implements CloseTabListener {
 
 //-------------------------------------------------------------------------------------
     private int addTabIfDoesntExists(File _file){
-        if(_file.getName().endsWith(".prj")){
-            if (gui.getMyComponents() != null)
+        if(_file.getName().endsWith(".xpuprj")){
+            if (gui.getMyComponents() != null){
                 gui.getMyComponents().getHierarchy().addProject(new Project(context, _file.getName()));
+            }
             return -1;
         }
         String _filePath = _file.getPath();
@@ -127,7 +130,9 @@ public class EditorByProject extends GuiPanel implements CloseTabListener {
         jTabbedPane1.setTabComponentAt(_count, new ButtonTabComponent(jTabbedPane1, this));
 
         List<String> _openFiles = projectConfig.getList(String.class, "open_files");
-        String _openFile = _file.getAbsolutePath();
+
+        String _openFile = project.relativizePath(_file.getAbsolutePath());
+
         if((_openFiles == null ) || (!_openFiles.contains(_openFile))){
             projectConfig.addProperty("open_files", _openFile);
         }

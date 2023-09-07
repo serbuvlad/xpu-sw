@@ -24,6 +24,7 @@ import xpu.sw.tools.sdk.common.io.targetmanager.*;
 //import xpu.sw.tools.sdk.common.io.updater.*;
 
 import xpu.sw.tools.sdk.gui.*;
+import xpu.sw.tools.sdk.gui.components.menu.file.newfile.*;
 import xpu.sw.tools.sdk.gui.components.menu.file.preferences.*;
 import xpu.sw.tools.sdk.gui.components.menu.project.newproject.*;
 import xpu.sw.tools.sdk.gui.components.menu.project.settingsproject.*;
@@ -55,6 +56,11 @@ public class MenuHandlers {
     }
 
 //-------------------------------------------------------------------------------------
+    public String getPathOfCurrentDirectory() {
+        return gui.getActiveProject().getRootPath();
+    }
+
+//-------------------------------------------------------------------------------------
     public void switchToProfile(String _newProfile) {
 //        log.debug("switchToProfile=" + _newProfile);
 //        new Throwable().printStackTrace();
@@ -68,26 +74,33 @@ public class MenuHandlers {
 
 //-------------------------------------------------------------------------------------
     public void newFile() {
-        String _lastDirectory = sdkConfig.getString("last_directory", FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath());
-        String _path = "noname00.asm";
+//        String _lastDirectory = sdkConfig.getString("last_directory", FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath());
+//        _lastDirectory = PathResolver.importPath(_lastDirectory);
+
+//        AsmFile(log, getPathOfCurrentDirectory(), noname
+        new NewFile(gui, context);
+
+        String _path = PathResolver.add(getPathOfCurrentDirectory(), "noname00");
         gui.getMyComponents().getEditor().addTab(_path);
     }
 
 //-------------------------------------------------------------------------------------
     public void openFile() {
-        String _lastDirectory = sdkConfig.getString("last_directory", FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath());
+//        String _lastDirectory = sdkConfig.getString("last_directory", FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath());
+//        _lastDirectory = PathResolver.importPath(_lastDirectory);
 /*                if((_lastDirectory == null) || (_lastDirectory.isEmpty())){
             _lastDirectory = FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath();
             _config.addProperty("last_directory", _lastDirectory);
         }*/
-        JFileChooser jfc = new JFileChooser(_lastDirectory);
+        String _path = getPathOfCurrentDirectory();
+        JFileChooser jfc = new JFileChooser(_path);
 
         int returnValue = jfc.showOpenDialog(null);
         // int returnValue = jfc.showSaveDialog(null);
 
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File selectedFile = jfc.getSelectedFile();
-            sdkConfig.setProperty("last_directory", selectedFile.getAbsolutePath());
+            sdkConfig.setProperty("last_directory", PathResolver.exportPath(selectedFile.getAbsolutePath()));
             gui.getMyComponents().getEditor().addTab(selectedFile);
         }
     }
@@ -127,10 +140,12 @@ public class MenuHandlers {
 
 //-------------------------------------------------------------------------------------
     public void openProject() {
-        String _defaultPath = context.getPathToSdkHome() + "/projects/";
-        String _lastDirectory = sdkConfig.getString("last.project.location", _defaultPath);
-        log.debug("setupOpenProject: _lastDirectory=" + _lastDirectory);
-        JFileChooser _jfc = new JFileChooser(_lastDirectory);
+//        String _defaultPath = context.getPathToSdkHome() + "/projects/";
+        String _defaultPath = PathResolver.XPU_LIBRARIES_PATH + "/app_level/";
+//        String _lastDirectory = sdkConfig.getString("last.project.location", _defaultPath);
+//        _lastDirectory = PathResolver.importPath(_lastDirectory);
+        log.debug("setupOpenProject: _lastDirectory=" + _defaultPath);
+        JFileChooser _jfc = new JFileChooser(_defaultPath);
         FileNameExtensionFilter _filter = new FileNameExtensionFilter("*.xpuprj", "xpuprj");
         _jfc.setFileFilter(_filter);
 
@@ -138,7 +153,7 @@ public class MenuHandlers {
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File _selectedFile = _jfc.getSelectedFile();
             String _path = _selectedFile.getAbsolutePath();
-            sdkConfig.setProperty("last.project.directory", _path);
+            sdkConfig.setProperty("last.project.directory", PathResolver.exportPath(_path));
             Project _project = new Project(context, _path);
             gui.getMyComponents().getHierarchy().addProject(_project);        
 //            openProject(_project);
@@ -170,10 +185,11 @@ public class MenuHandlers {
 //-------------------------------------------------------------------------------------
     public void addFileToProject() {
 //        log.debug("Not implemented yet!");
-        String _lastDirectory = sdkConfig.getString("last_directory", FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath());
-        JFileChooser jfc = new JFileChooser(_lastDirectory);
+//        String _lastDirectory = sdkConfig.getString("last_directory", FileSystemView.getFileSystemView().getHomeDirectory().getAbsolutePath());
+        String _path = getPathOfCurrentDirectory();
+        JFileChooser jfc = new JFileChooser(_path);
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
-            "Asm, C, C++ files", "asm", "c", "cpp");
+            "Asm, C, C++, ONNX files", "asm", "c", "cpp", "onnx");
         jfc.setFileFilter(filter);
         int returnValue = jfc.showOpenDialog(null);
 
