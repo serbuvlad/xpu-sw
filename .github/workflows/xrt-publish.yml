@@ -32,7 +32,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        cd build/xrt/x86_64-linux-gnu/bin
+        cd cross-build/xrt/x86_64-linux-gnu/bin
         tar czf x86_64-linux-gnu-xrt.tar.gz xrt
         sha256sum x86_64-linux-gnu-xrt.tar.gz >x86_64-linux-gnu-xrt.tar.gz.sha256sum
         last_tag_pushed=$(git ls-remote --tags origin | awk -F/ '{print $3}' | sort -V | tail -n1)
@@ -44,7 +44,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        cd build/xrt/arm-linux-gnueabihf/bin
+        cd cross-build/xrt/arm-linux-gnueabihf/bin
         tar czf arm-linux-gnueabihf-xrt.tar.gz xrt
         sha256sum arm-linux-gnueabihf-xrt.tar.gz >arm-linux-gnueabihf-xrt.tar.gz.sha256sum
         last_tag_pushed=$(git ls-remote --tags origin | awk -F/ '{print $3}' | sort -V | tail -n1)
