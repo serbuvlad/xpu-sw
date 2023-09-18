@@ -1,0 +1,51 @@
+name: Build xrt binaries
+
+on:
+  repository_dispatch:
+    types: [gradle-publish]
+
+jobs:
+  build:
+    runs-on: [self-hosted, linux, x64, vivado]
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}/tools/xrt
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Building dependencies for GNU/Linux x86_64
+      run: ./bin/build-deps.sh x86_64-linux-gnu
+      
+    - name: Building xrt for GNU/Linux x86_64
+      run: ./bin/build-xrt.sh x86_64-linux-gnu
+      
+    - name: Building dependencies for GNU/Linux ARM EABI (hardware float)
+      run: ./bin/build-deps.sh arm-linux-gnueabihf
+      
+    - name: Building xrt for GNU/Linux ARM EABI (hardware float)
+      run: ./bin/build-xrt.sh arm-linux-gnueabihf
+      
+    - name: Publishing xrt for GNU/Linux x86_64
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        cd build/xrt/x86_64-linux-gnu/bin
+        tar czf x86_64-linux-gnu-xrt.tar.gz xrt
+        sha256sum x86_64-linux-gnu-xrt.tar.gz >x86_64-linux-gnu-xrt.tar.gz.sha256sum
+        last_tag_pushed=$(git ls-remote --tags origin | awk -F/ '{print $3}' | sort -V | tail -n1)
+        last_tag_valid=$(echo "$last_tag_pushed" | sed 's/[^0-9]*$//')
+        gh release upload $last_tag_valid x86_64-linux-gnu-xrt.tar.gz
+        gh release upload $last_tag_valid x86_64-linux-gnu-xrt.tar.gz.sha256sum
+    
+    - name: Publishing xrt for GNU/Linux ARM EABI (hardware float)
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        cd build/xrt/arm-linux-gnueabihf/bin
+        tar czf arm-linux-gnueabihf-xrt.tar.gz xrt
+        sha256sum arm-linux-gnueabihf-xrt.tar.gz >arm-linux-gnueabihf-xrt.tar.gz.sha256sum
+        last_tag_pushed=$(git ls-remote --tags origin | awk -F/ '{print $3}' | sort -V | tail -n1)
+        last_tag_valid=$(echo "$last_tag_pushed" | sed 's/[^0-9]*$//')
+        gh release upload $last_tag_valid arm-linux-gnueabihf.tar.gz
+        gh release upload $last_tag_valid arm-linux-gnueabihf.tar.gz.sha256sum
