@@ -15,7 +15,9 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: Building dependencies for GNU/Linux x86_64
-      run: ./bin/build-deps.sh x86_64-linux-gnu
+      run: |
+        cd ${{ github.workspace }}/tools/xrt
+        ./bin/build-deps.sh x86_64-linux-gnu
       
     - name: Building xrt for GNU/Linux x86_64
       run: ./bin/build-xrt.sh x86_64-linux-gnu
